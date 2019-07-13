@@ -1,0 +1,11 @@
+{
+  "appId": "com.nosila.churrasco",
+  "appName": "churrasco",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "webDir": "www",
+  "server": {
+    "url": "http://10.136.74.11:4200",
+    "hostname": "app"
+  }
+}
