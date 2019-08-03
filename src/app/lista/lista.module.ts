@@ -7,6 +7,9 @@ import {ItemCompraDetailComponent} from './components/item-compra-detail/item-co
 import {CompraListComponent} from './components/compra-list/compra-list.component';
 import {ListaCompraComponent} from './containers/lista-compra/lista-compra.component';
 import {SharedModule} from '../core/shared/shared.module';
+import {StoreModule} from '@ngrx/store';
+import {itemReducer} from './store/reducers/global.reducer';
+
 
 
 
@@ -16,7 +19,9 @@ import {SharedModule} from '../core/shared/shared.module';
   imports: [
     CommonModule,
     ListaRoutingModule,
-    SharedModule
+    SharedModule,
+    StoreModule.forFeature('item', itemReducer),
+
 
   ]
 })

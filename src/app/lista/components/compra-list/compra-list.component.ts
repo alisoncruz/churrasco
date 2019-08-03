@@ -1,4 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {Item} from '../../model/item';
+import {selectItem} from '../../store/actions/item.actions';
+
 
 @Component({
   selector: 'app-compra-list',
@@ -7,9 +10,20 @@ import { Component, OnInit } from '@angular/core';
 })
 export class CompraListComponent implements OnInit {
 
-  constructor() { }
+  @Input()
+  items: Item[];
+
+  @Output()
+  actionEmitter = new EventEmitter();
+
+  constructor() {
+  }
 
   ngOnInit() {
+  }
+
+  select(item: Item) {
+    this.actionEmitter.emit(selectItem({item}));
   }
 
 }

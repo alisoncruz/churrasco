@@ -1,4 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, Input, OnInit} from '@angular/core';
+import {Observable} from 'rxjs';
+import {Item} from '../../model/item';
+import {Action, select, Store} from '@ngrx/store';
+import {ItemState} from '../../store/reducers/item.reducer';
+
+import {getAllItems} from '../../store/selectors/item.selectors';
 
 @Component({
   selector: 'app-lista-compra',
@@ -7,9 +13,17 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ListaCompraComponent implements OnInit {
 
-  constructor() { }
+  items$: Observable<Item[]>;
+
+  constructor(private store: Store<ItemState>) {
+  }
 
   ngOnInit() {
+    this.items$ = this.store.pipe(select(getAllItems));
+  }
+
+  dispatch(action: Action) {
+    this.store.dispatch(action);
   }
 
 }

@@ -1,1 +1,1 @@
-<app-item-compra-detail></app-item-compra-detail>
+<app-item-compra-detail [item]="item$ | async" (actionEmitter)="dispatch($event)"></app-item-compra-detail>
