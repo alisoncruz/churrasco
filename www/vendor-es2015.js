@@ -467,7 +467,7 @@ class Location {
         /** @type {?} */
         const match = url.match(/#|\?|$/);
         /** @type {?} */
-        const pathEndIdx = match && match.index || url.length;
+        const pathEndIdx = match && match.global || url.length;
         /** @type {?} */
         const droppedSlashIdx = pathEndIdx - (url[pathEndIdx - 1] === '/' ? 1 : 0);
         return url.slice(0, droppedSlashIdx) + url.slice(pathEndIdx);
@@ -9835,7 +9835,7 @@ class AstTransformer {
         return this.transformExpr(new WriteVarExpr(expr.name, expr.value.visitExpression(this, context), expr.type, expr.sourceSpan), context);
     }
     visitWriteKeyExpr(expr, context) {
-        return this.transformExpr(new WriteKeyExpr(expr.receiver.visitExpression(this, context), expr.index.visitExpression(this, context), expr.value.visitExpression(this, context), expr.type, expr.sourceSpan), context);
+        return this.transformExpr(new WriteKeyExpr(expr.receiver.visitExpression(this, context), expr.global.visitExpression(this, context), expr.value.visitExpression(this, context), expr.type, expr.sourceSpan), context);
     }
     visitWritePropExpr(expr, context) {
         return this.transformExpr(new WritePropExpr(expr.receiver.visitExpression(this, context), expr.name, expr.value.visitExpression(this, context), expr.type, expr.sourceSpan), context);
@@ -9876,7 +9876,7 @@ class AstTransformer {
         return this.transformExpr(new ReadPropExpr(ast.receiver.visitExpression(this, context), ast.name, ast.type, ast.sourceSpan), context);
     }
     visitReadKeyExpr(ast, context) {
-        return this.transformExpr(new ReadKeyExpr(ast.receiver.visitExpression(this, context), ast.index.visitExpression(this, context), ast.type, ast.sourceSpan), context);
+        return this.transformExpr(new ReadKeyExpr(ast.receiver.visitExpression(this, context), ast.global.visitExpression(this, context), ast.type, ast.sourceSpan), context);
     }
     visitLiteralArrayExpr(ast, context) {
         return this.transformExpr(new LiteralArrayExpr(this.visitAllExpressions(ast.entries, context), ast.type, ast.sourceSpan), context);
@@ -9961,7 +9961,7 @@ class RecursiveAstVisitor {
     }
     visitWriteKeyExpr(ast, context) {
         ast.receiver.visitExpression(this, context);
-        ast.index.visitExpression(this, context);
+        ast.global.visitExpression(this, context);
         ast.value.visitExpression(this, context);
         return this.visitExpression(ast, context);
     }
@@ -10027,7 +10027,7 @@ class RecursiveAstVisitor {
     }
     visitReadKeyExpr(ast, context) {
         ast.receiver.visitExpression(this, context);
-        ast.index.visitExpression(this, context);
+        ast.global.visitExpression(this, context);
         return this.visitExpression(ast, context);
     }
     visitLiteralArrayExpr(ast, context) {
@@ -13632,7 +13632,7 @@ class AbstractEmitterVisitor {
         }
         expr.receiver.visitExpression(this, ctx);
         ctx.print(expr, `[`);
-        expr.index.visitExpression(this, ctx);
+        expr.global.visitExpression(this, ctx);
         ctx.print(expr, `] = `);
         expr.value.visitExpression(this, ctx);
         if (!lineWasEmpty) {
@@ -13814,7 +13814,7 @@ class AbstractEmitterVisitor {
     visitReadKeyExpr(ast, ctx) {
         ast.receiver.visitExpression(this, ctx);
         ctx.print(ast, `[`);
-        ast.index.visitExpression(this, ctx);
+        ast.global.visitExpression(this, ctx);
         ctx.print(ast, `]`);
         return null;
     }
@@ -21037,7 +21037,7 @@ class _ParseAST {
     }
     get next() { return this.peek(0); }
     get inputIndex() {
-        return (this.index < this.tokens.length) ? this.next.index + this.offset :
+        return (this.index < this.tokens.length) ? this.next.global + this.offset :
             this.inputLength + this.offset;
     }
     span(start) { return new ParseSpan(start, this.inputIndex); }
@@ -22554,7 +22554,7 @@ function wrapTag(symbol, { index, ctx, isVoid }, closed) {
 }
 function findTemplateFn(ctx, templateIndex) {
     return (token) => typeof token === 'object' && token.type === TagType.TEMPLATE &&
-        token.index === templateIndex && token.ctx === ctx;
+        token.global === templateIndex && token.ctx === ctx;
 }
 function serializePlaceholderValue(value) {
     const element = (data, closed) => wrapTag('#', data, closed);
@@ -29693,7 +29693,7 @@ class ViewBuilder$1 {
             sourceSpan: ast.sourceSpan,
             nodeFlags: 8 /* TypeNgContent */,
             nodeDef: importExpr(Identifiers.ngContentDef).callFn([
-                literal(ast.ngContentIndex), literal(ast.index)
+                literal(ast.ngContentIndex), literal(ast.global)
             ])
         }));
     }
@@ -32792,9 +32792,9 @@ class StaticReflector {
                                         return ~operand;
                                 }
                                 return null;
-                            case 'index':
+                            case 'global.reducers.ts':
                                 let indexTarget = simplifyEagerly(expression['expression']);
-                                let index = simplifyEagerly(expression['index']);
+                                let index = simplifyEagerly(expression['global.reducers.ts']);
                                 if (indexTarget && isPrimitive(index))
                                     return indexTarget[index];
                                 return null;
@@ -33425,7 +33425,7 @@ class StatementInterpreter {
     }
     visitWriteKeyExpr(expr, ctx) {
         const receiver = expr.receiver.visitExpression(this, ctx);
-        const index = expr.index.visitExpression(this, ctx);
+        const index = expr.global.visitExpression(this, ctx);
         const value = expr.value.visitExpression(this, ctx);
         receiver[index] = value;
         return value;
@@ -33597,7 +33597,7 @@ class StatementInterpreter {
     }
     visitReadKeyExpr(ast, ctx) {
         const receiver = ast.receiver.visitExpression(this, ctx);
-        const prop = ast.index.visitExpression(this, ctx);
+        const prop = ast.global.visitExpression(this, ctx);
         return receiver[prop];
     }
     visitLiteralArrayExpr(ast, ctx) {
@@ -40234,7 +40234,7 @@ function getNativeByIndex(index, lView) {
  * @return {?}
  */
 function getNativeByTNode(tNode, hostView) {
-    return unwrapRNode(hostView[tNode.index]);
+    return unwrapRNode(hostView[tNode.global]);
 }
 /**
  * A helper function that returns `true` if a given `TNode` has any matching directives.
@@ -42828,7 +42828,7 @@ function findViaNativeElement(lView, target) {
         /** @type {?} */
         const native = (/** @type {?} */ (getNativeByTNode(tNode, lView)));
         if (native === target) {
-            return tNode.index;
+            return tNode.global;
         }
         tNode = traverseNextElement(tNode);
     }
@@ -42910,7 +42910,7 @@ function findViaDirective(lView, directiveInstance) {
         const directiveIndexEnd = tNode.directiveEnd;
         for (let i = directiveIndexStart; i < directiveIndexEnd; i++) {
             if (lView[i] === directiveInstance) {
-                return tNode.index;
+                return tNode.global;
             }
         }
         tNode = traverseNextElement(tNode);
@@ -42965,7 +42965,7 @@ function discoverLocalRefs(lView, nodeIndex) {
         /** @type {?} */
         const result = {};
         /** @type {?} */
-        let localIndex = tNode.index + 1;
+        let localIndex = tNode.global + 1;
         for (let i = 0; i < tNode.localNames.length; i += 2) {
             result[tNode.localNames[i]] = lView[localIndex];
             localIndex++;
@@ -48908,7 +48908,7 @@ function toDebugNodes(tNode, lView) {
         let tNodeCursor = tNode;
         while (tNodeCursor) {
             /** @type {?} */
-            const rawValue = lView[tNode.index];
+            const rawValue = lView[tNode.global];
             /** @type {?} */
             const native = unwrapRNode(rawValue);
             /** @type {?} */
@@ -49836,7 +49836,7 @@ function saveResolvedLocalsInData(viewData, tNode, localRefExtractor) {
     const localNames = tNode.localNames;
     if (localNames) {
         /** @type {?} */
-        let localIndex = tNode.index + 1;
+        let localIndex = tNode.global + 1;
         for (let i = 0; i < localNames.length; i += 2) {
             /** @type {?} */
             const index = (/** @type {?} */ (localNames[i + 1]));
@@ -50384,7 +50384,7 @@ function resolveDirectives(tView, viewData, directives, tNode, localRefs) {
         /** @type {?} */
         const initialPreOrderCheckHooksLength = (tView.preOrderCheckHooks && tView.preOrderCheckHooks.length) || 0;
         /** @type {?} */
-        const nodeIndex = tNode.index - HEADER_OFFSET;
+        const nodeIndex = tNode.global - HEADER_OFFSET;
         for (let i = 0; i < directives.length; i++) {
             /** @type {?} */
             const def = (/** @type {?} */ (directives[i]));
@@ -50442,7 +50442,7 @@ function invokeDirectivesHostBindings(tView, viewData, tNode) {
     /** @type {?} */
     const firstTemplatePass = tView.firstTemplatePass;
     /** @type {?} */
-    const elementIndex = tNode.index - HEADER_OFFSET;
+    const elementIndex = tNode.global - HEADER_OFFSET;
     /** @type {?} */
     const selectedIndex = getSelectedIndex();
     try {
@@ -50483,7 +50483,7 @@ function invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstT
     const previousExpandoLength = expando.length;
     setCurrentDirectiveDef(def);
     /** @type {?} */
-    const elementIndex = tNode.index - HEADER_OFFSET;
+    const elementIndex = tNode.global - HEADER_OFFSET;
     (/** @type {?} */ (def.hostBindings))(1 /* Create */, directive, elementIndex);
     setCurrentDirectiveDef(null);
     // `hostBindings` function may or may not contain `allocHostVars` call
@@ -50507,7 +50507,7 @@ function invokeHostBindingsInCreationMode(def, expando, directive, tNode, firstT
 function generateExpandoInstructionBlock(tView, tNode, directiveCount) {
     ngDevMode && assertEqual(tView.firstTemplatePass, true, 'Expando block should only be generated on first template pass.');
     /** @type {?} */
-    const elementIndex = -(tNode.index - HEADER_OFFSET);
+    const elementIndex = -(tNode.global - HEADER_OFFSET);
     /** @type {?} */
     const providerStartIndex = tNode.providerIndexes & 65535 /* ProvidersStartIndexMask */;
     /** @type {?} */
@@ -50536,7 +50536,7 @@ function postProcessDirective(viewData, directive, def, directiveDefIdx) {
     }
     if (isComponentDef(def)) {
         /** @type {?} */
-        const componentView = getComponentViewByIndex(previousOrParentTNode.index, viewData);
+        const componentView = getComponentViewByIndex(previousOrParentTNode.global, viewData);
         componentView[CONTEXT] = directive;
     }
 }
@@ -50604,7 +50604,7 @@ function queueComponentIndexForCheck(previousOrParentTNode) {
     const tView = getLView()[TVIEW];
     ngDevMode &&
         assertEqual(tView.firstTemplatePass, true, 'Should only be called in first template pass.');
-    (tView.components || (tView.components = ngDevMode ? new (/** @type {?} */ (TViewComponents))() : [])).push(previousOrParentTNode.index);
+    (tView.components || (tView.components = ngDevMode ? new (/** @type {?} */ (TViewComponents))() : [])).push(previousOrParentTNode.global);
 }
 /**
  * Caches local names and their matching directive indices for query and template lookups.
@@ -50700,11 +50700,11 @@ function addComponentLogic(lView, previousOrParentTNode, def) {
     /** @type {?} */
     const rendererFactory = lView[RENDERER_FACTORY];
     /** @type {?} */
-    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, lView[previousOrParentTNode.index], (/** @type {?} */ (previousOrParentTNode)), rendererFactory, rendererFactory.createRenderer((/** @type {?} */ (native)), def)));
+    const componentView = addToViewTree(lView, createLView(lView, tView, null, def.onPush ? 64 /* Dirty */ : 16 /* CheckAlways */, lView[previousOrParentTNode.global], (/** @type {?} */ (previousOrParentTNode)), rendererFactory, rendererFactory.createRenderer((/** @type {?} */ (native)), def)));
     componentView[T_HOST] = (/** @type {?} */ (previousOrParentTNode));
     // Component view will always be created before any injected LContainers,
     // so this is a regular element, wrap it with the component view
-    lView[previousOrParentTNode.index] = componentView;
+    lView[previousOrParentTNode.global] = componentView;
     if (lView[TVIEW].firstTemplatePass) {
         queueComponentIndexForCheck(previousOrParentTNode);
     }
@@ -51258,7 +51258,7 @@ function getTViewCleanup(view) {
  */
 function loadComponentRenderer(tNode, lView) {
     /** @type {?} */
-    const componentLView = (/** @type {?} */ (lView[tNode.index]));
+    const componentLView = (/** @type {?} */ (lView[tNode.global]));
     return componentLView[RENDERER];
 }
 /**
@@ -52698,7 +52698,7 @@ function getLContainer(tNode, embeddedView) {
     ngDevMode && assertLView(embeddedView);
     /** @type {?} */
     const container = (/** @type {?} */ (embeddedView[PARENT]));
-    if (tNode.index === -1) {
+    if (tNode.global === -1) {
         // This is a dynamically created view inside a dynamic container.
         // The parent isn't an LContainer if the embedded view hasn't been attached yet.
         return isLContainer(container) ? container : null;
@@ -53144,7 +53144,7 @@ function getRenderParent(tNode, currentView) {
             /** @type {?} */
             const tData = currentView[TVIEW].data;
             /** @type {?} */
-            const tNode = (/** @type {?} */ (tData[renderParent.index]));
+            const tNode = (/** @type {?} */ (tData[renderParent.global]));
             /** @type {?} */
             const encapsulation = ((/** @type {?} */ (tData[tNode.directiveStart]))).encapsulation;
             // We've got a parent which is an element in the current view. We just need to verify if the
@@ -53430,7 +53430,7 @@ function appendProjectedNode(projectedTNode, tProjectionNode, currentView, proje
     // logical container of the content projected views
     attachPatchData(native, projectionView);
     /** @type {?} */
-    const nodeOrContainer = projectionView[projectedTNode.index];
+    const nodeOrContainer = projectionView[projectedTNode.global];
     if (projectedTNode.type === 0 /* Container */) {
         // The node we are adding is a container and we are adding it to an element which
         // is not a component (no more re-projection).
@@ -53585,7 +53585,7 @@ function executeActionOnContainer(renderer, action, lContainer, renderParent, be
  */
 function executeActionOnElementContainer(renderer, action, lView, tElementContainerNode, renderParent, beforeNode) {
     /** @type {?} */
-    const node = lView[tElementContainerNode.index];
+    const node = lView[tElementContainerNode.global];
     executeActionOnElementOrContainer(action, renderer, renderParent, node, beforeNode);
     /** @type {?} */
     let childTNode = tElementContainerNode.child;
@@ -53614,7 +53614,7 @@ function executeActionOnNode(renderer, action, lView, tNode, renderParent, befor
     }
     else {
         ngDevMode && assertNodeOfPossibleTypes(tNode, 3 /* Element */, 0 /* Container */);
-        executeActionOnElementOrContainer(action, renderer, renderParent, lView[tNode.index], beforeNode);
+        executeActionOnElementOrContainer(action, renderer, renderParent, lView[tNode.global], beforeNode);
     }
 }
 
@@ -53726,7 +53726,7 @@ function ɵɵcontainerRefreshEnd() {
     }
     ngDevMode && assertNodeType(previousOrParentTNode, 0 /* Container */);
     /** @type {?} */
-    const lContainer = getLView()[previousOrParentTNode.index];
+    const lContainer = getLView()[previousOrParentTNode.global];
     /** @type {?} */
     const nextIndex = lContainer[ACTIVE_INDEX];
     // remove extra views at the end of the container
@@ -53751,7 +53751,7 @@ function addTContainerToQueries(lView, tContainerNode) {
     const queries = lView[QUERIES];
     if (queries) {
         /** @type {?} */
-        const lContainer = lView[tContainerNode.index];
+        const lContainer = lView[tContainerNode.global];
         if (lContainer[QUERIES]) {
             // Query container should only exist if it was created through a dynamic view
             // in a directive constructor. In this case, we must splice the template
@@ -54778,7 +54778,7 @@ function ɵɵelementEnd() {
     /** @type {?} */
     const currentQueries = lView[QUERIES];
     // Go back up to parent queries only if queries have been cloned on this element.
-    if (currentQueries && previousOrParentTNode.index === currentQueries.nodeIndex) {
+    if (currentQueries && previousOrParentTNode.global === currentQueries.nodeIndex) {
         lView[QUERIES] = currentQueries.parent;
     }
     registerPostOrderHooks(lView[TVIEW], previousOrParentTNode);
@@ -54789,12 +54789,12 @@ function ɵɵelementEnd() {
     /** @type {?} */
     let stylingContext = null;
     if (hasClassInput(previousOrParentTNode)) {
-        stylingContext = getStylingContextFromLView(previousOrParentTNode.index, lView);
+        stylingContext = getStylingContextFromLView(previousOrParentTNode.global, lView);
         setInputsForProperty(lView, (/** @type {?} */ ((/** @type {?} */ (previousOrParentTNode.inputs))['class'])), getInitialClassNameValue(stylingContext));
     }
     if (hasStyleInput(previousOrParentTNode)) {
         stylingContext =
-            stylingContext || getStylingContextFromLView(previousOrParentTNode.index, lView);
+            stylingContext || getStylingContextFromLView(previousOrParentTNode.global, lView);
         setInputsForProperty(lView, (/** @type {?} */ ((/** @type {?} */ (previousOrParentTNode.inputs))['style'])), getInitialStyleStringValue(stylingContext));
     }
 }
@@ -54961,7 +54961,7 @@ function ɵɵelementContainerEnd() {
     /** @type {?} */
     const currentQueries = lView[QUERIES];
     // Go back up to parent queries only if queries have been cloned on this element.
-    if (currentQueries && previousOrParentTNode.index === currentQueries.nodeIndex) {
+    if (currentQueries && previousOrParentTNode.global === currentQueries.nodeIndex) {
         lView[QUERIES] = currentQueries.parent;
     }
     // this is required for all host-level styling-related instructions to run
@@ -54995,7 +54995,7 @@ function ɵɵembeddedViewStart(viewBlockId, consts, vars) {
         (/** @type {?} */ (previousOrParentTNode.parent)) :
         previousOrParentTNode;
     /** @type {?} */
-    const lContainer = (/** @type {?} */ (lView[containerTNode.index]));
+    const lContainer = (/** @type {?} */ (lView[containerTNode.global]));
     ngDevMode && assertNodeType(containerTNode, 0 /* Container */);
     /** @type {?} */
     let viewToRender = scanForView(lContainer, (/** @type {?} */ (lContainer[ACTIVE_INDEX])), viewBlockId);
@@ -55280,8 +55280,8 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
              * @param {?} _lView
              * @return {?}
              */
-            (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.index])).target) :
-            tNode.index;
+            (_lView) => eventTargetResolver(unwrapRNode(_lView[tNode.global])).target) :
+            tNode.global;
         // In order to match current behavior, native DOM event listeners must be added for all
         // events (including outputs).
         if (isProceduralRenderer(renderer)) {
@@ -55304,7 +55304,7 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
             // matching on a given node as we can't register multiple event handlers for the same event in
             // a template (this would mean having duplicate attributes).
             if (!eventTargetResolver && hasDirectives(tNode)) {
-                existingListener = findExistingListener(lView, eventName, tNode.index);
+                existingListener = findExistingListener(lView, eventName, tNode.global);
             }
             if (existingListener !== null) {
                 // Attach a new listener at the head of the coalesced listeners list.
@@ -55366,7 +55366,7 @@ function listenerInternal(eventName, listenerFn, useCapture = false, eventTarget
                 /** @type {?} */
                 const idx = lCleanup.length;
                 lCleanup.push(listenerFn, subscription);
-                tCleanup && tCleanup.push(eventName, tNode.index, idx, -(idx + 1));
+                tCleanup && tCleanup.push(eventName, tNode.global, idx, -(idx + 1));
             }
         }
     }
@@ -55409,7 +55409,7 @@ function wrapListener(tNode, lView, listenerFn, wrapWithPreventDefault) {
         // In order to be backwards compatible with View Engine, events on component host nodes
         // must also mark the component view itself dirty (i.e. the view that it owns).
         /** @type {?} */
-        const startView = tNode.flags & 1 /* isComponent */ ? getComponentViewByIndex(tNode.index, lView) : lView;
+        const startView = tNode.flags & 1 /* isComponent */ ? getComponentViewByIndex(tNode.global, lView) : lView;
         // See interfaces/view.ts for more on LViewFlags.ManualOnPush
         if ((lView[FLAGS] & 32 /* ManualOnPush */) === 0) {
             markViewDirty(startView);
@@ -57080,7 +57080,7 @@ function createRootComponent(componentView, componentDef, rootView, rootContext,
     const rootTNode = getPreviousOrParentTNode();
     if (tView.firstTemplatePass && componentDef.hostBindings) {
         /** @type {?} */
-        const elementIndex = rootTNode.index - HEADER_OFFSET;
+        const elementIndex = rootTNode.global - HEADER_OFFSET;
         setActiveHostElement(elementIndex);
         /** @type {?} */
         const expando = (/** @type {?} */ (tView.expandoInstructions));
@@ -57755,7 +57755,7 @@ function multiViewProvidersFactoryResolver(_, tData, lData, tNode) {
         /** @type {?} */
         const componentCount = (/** @type {?} */ (this.providerFactory.componentProviders));
         /** @type {?} */
-        const multiProviders = getNodeInjectable(tData, lData, (/** @type {?} */ ((/** @type {?} */ (this.providerFactory)).index)), tNode);
+        const multiProviders = getNodeInjectable(tData, lData, (/** @type {?} */ ((/** @type {?} */ (this.providerFactory)).global)), tNode);
         // Copy the section of the array which contains `multi` `providers` from the component
         result = multiProviders.slice(0, componentCount);
         // Insert the `viewProvider` instances.
@@ -58475,7 +58475,7 @@ function createTemplateRef(TemplateRefToken, ElementRefToken, hostTNode, hostVie
     }
     if (hostTNode.type === 0 /* Container */) {
         /** @type {?} */
-        const hostContainer = hostView[hostTNode.index];
+        const hostContainer = hostView[hostTNode.global];
         ngDevMode && assertDefined(hostTNode.tViews, 'TView must be allocated');
         return new R3TemplateRef(hostView, createElementRef(ElementRefToken, hostTNode, hostView), (/** @type {?} */ (hostTNode.tViews)), hostContainer, hostTNode.injectorIndex);
     }
@@ -58700,7 +58700,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
                 if (ngDevMode) {
                     assertGreaterThan(index, -1, 'index must be positive');
                     // +1 because it's legal to insert at the end.
-                    assertLessThan(index, this.length + 1 + shift, 'index');
+                    assertLessThan(index, this.length + 1 + shift, 'global.reducers.ts');
                 }
                 return index;
             }
@@ -58719,7 +58719,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
     /** @type {?} */
     let lContainer;
     /** @type {?} */
-    const slotValue = hostView[hostTNode.index];
+    const slotValue = hostView[hostTNode.global];
     if (isLContainer(slotValue)) {
         // If the host is a container, we don't need to create a new LContainer
         lContainer = slotValue;
@@ -58753,7 +58753,7 @@ function createContainerRef(ViewContainerRefToken, ElementRefToken, hostTNode, h
         else {
             appendChild(commentNode, hostTNode, hostView);
         }
-        hostView[hostTNode.index] = lContainer =
+        hostView[hostTNode.global] = lContainer =
             createLContainer(slotValue, hostView, commentNode, hostTNode, true);
         addToViewTree(hostView, lContainer);
     }
@@ -58779,7 +58779,7 @@ function createViewRef(hostTNode, hostView, context) {
         /** @type {?} */
         const componentIndex = hostTNode.directiveStart;
         /** @type {?} */
-        const componentView = getComponentViewByIndex(hostTNode.index, hostView);
+        const componentView = getComponentViewByIndex(hostTNode.global, hostView);
         return new ViewRef(componentView, context, componentIndex);
     }
     else if (hostTNode.type === 3 /* Element */ || hostTNode.type === 0 /* Container */ ||
@@ -58817,7 +58817,7 @@ function injectRenderer2() {
     /** @type {?} */
     const tNode = getPreviousOrParentTNode();
     /** @type {?} */
-    const nodeAtIndex = getComponentViewByIndex(tNode.index, lView);
+    const nodeAtIndex = getComponentViewByIndex(tNode.global, lView);
     return getOrCreateRenderer2(isLView(nodeAtIndex) ? nodeAtIndex : lView);
 }
 
@@ -61303,7 +61303,7 @@ function visitProjectedRenderNodes(view, ngContentIndex, action, parentNode, nex
  */
 function visitRenderNode(view, nodeDef, action, parentNode, nextSibling, target) {
     if (nodeDef.flags & 8 /* TypeNgContent */) {
-        visitProjectedRenderNodes(view, (/** @type {?} */ (nodeDef.ngContent)).index, action, parentNode, nextSibling, target);
+        visitProjectedRenderNodes(view, (/** @type {?} */ (nodeDef.ngContent)).global, action, parentNode, nextSibling, target);
     }
     else {
         /** @type {?} */
@@ -61587,9 +61587,9 @@ function resolveNgModuleDep(data, depDef, notFoundValue = Injector.THROW_IF_NOT_
         let injectableDef;
         if (providerDef) {
             /** @type {?} */
-            let providerInstance = data._providers[providerDef.index];
+            let providerInstance = data._providers[providerDef.global];
             if (providerInstance === undefined) {
-                providerInstance = data._providers[providerDef.index] =
+                providerInstance = data._providers[providerDef.global] =
                     _createProviderInstance(data, providerDef);
             }
             return providerInstance === UNDEFINED_VALUE ? undefined : providerInstance;
@@ -64003,7 +64003,7 @@ function extractParts(pattern) {
     let match;
     while (match = braces.exec(pattern)) {
         /** @type {?} */
-        const pos = match.index;
+        const pos = match.global;
         if (match[0] == '}') {
             braceStack.pop();
             if (braceStack.length == 0) {
@@ -64108,13 +64108,13 @@ function removeInnerTemplateTranslation(message) {
     let tagMatched;
     while ((match = SUBTEMPLATE_REGEXP.exec(message)) !== null) {
         if (!inTemplate) {
-            res += message.substring(index, match.index + match[0].length);
+            res += message.substring(index, match.global + match[0].length);
             tagMatched = match[1];
             inTemplate = true;
         }
         else {
             if (match[0] === `${MARKER}/*${tagMatched}${MARKER}`) {
-                index = match.index;
+                index = match.global;
                 inTemplate = false;
             }
         }
@@ -64307,7 +64307,7 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
     const parentTNode = getIsParent() ? getPreviousOrParentTNode() :
         previousOrParentTNode && previousOrParentTNode.parent;
     /** @type {?} */
-    let parentIndex = parentTNode && parentTNode !== viewData[T_HOST] ? parentTNode.index - HEADER_OFFSET : index;
+    let parentIndex = parentTNode && parentTNode !== viewData[T_HOST] ? parentTNode.global - HEADER_OFFSET : index;
     /** @type {?} */
     let parentIndexPointer = 0;
     parentIndexStack[parentIndexPointer] = parentIndex;
@@ -64317,7 +64317,7 @@ function i18nStartFirstPass(tView, index, message, subTemplateIndex) {
     // element and we need to keep a reference of the previous element if there is one
     if (index > 0 && previousOrParentTNode !== parentTNode) {
         // Create an OpCode to select the previous TNode
-        createOpCodes.push(previousOrParentTNode.index << 3 /* SHIFT_REF */ | 0 /* Select */);
+        createOpCodes.push(previousOrParentTNode.global << 3 /* SHIFT_REF */ | 0 /* Select */);
     }
     /** @type {?} */
     const updateOpCodes = [];
@@ -64456,7 +64456,7 @@ function appendI18nNode(tNode, parentTNode, previousTNode, viewData) {
     }
     appendChild(getNativeByTNode(tNode, viewData), tNode, viewData);
     /** @type {?} */
-    const slotValue = viewData[tNode.index];
+    const slotValue = viewData[tNode.global];
     if (tNode.type !== 0 /* Container */ && isLContainer(slotValue)) {
         // Nodes that inject ViewContainerRef also have a comment node that should be moved
         appendChild(slotValue[NATIVE], tNode, viewData);
@@ -64631,7 +64631,7 @@ function i18nEndFirstPass(tView) {
     /** @type {?} */
     const visitedNodes = readCreateOpCodes(rootIndex, tI18n.create, tI18n.icus, viewData);
     // Remove deleted nodes
-    for (let i = rootIndex + 1; i <= lastCreatedNode.index - HEADER_OFFSET; i++) {
+    for (let i = rootIndex + 1; i <= lastCreatedNode.global - HEADER_OFFSET; i++) {
         if (visitedNodes.indexOf(i) === -1) {
             removeNode(i, viewData);
         }
@@ -64975,7 +64975,7 @@ function i18nAttributesFirstPass(tView, index, values) {
     /** @type {?} */
     const previousElement = getPreviousOrParentTNode();
     /** @type {?} */
-    const previousElementIndex = previousElement.index - HEADER_OFFSET;
+    const previousElementIndex = previousElement.global - HEADER_OFFSET;
     /** @type {?} */
     const updateOpCodes = [];
     for (let i = 0; i < values.length; i += 2) {
@@ -66565,7 +66565,7 @@ class LQueries_ {
      */
     clone(tNode) {
         return this.shallow !== null || isContentQueryHost(tNode) ?
-            new LQueries_(this, null, this.deep, tNode.index) :
+            new LQueries_(this, null, this.deep, tNode.global) :
             this;
     }
     /**
@@ -67025,7 +67025,7 @@ read) {
     const tView = lView[TVIEW];
     /** @type {?} */
     const tNode = getPreviousOrParentTNode();
-    return contentQueryInternal(lView, tView, directiveIndex, predicate, descend, read, false, tNode.index);
+    return contentQueryInternal(lView, tView, directiveIndex, predicate, descend, read, false, tNode.global);
 }
 /**
  * @template T
@@ -67078,7 +67078,7 @@ read) {
     const tView = lView[TVIEW];
     /** @type {?} */
     const tNode = getPreviousOrParentTNode();
-    contentQueryInternal(lView, tView, directiveIndex, predicate, descend, read, true, tNode.index);
+    contentQueryInternal(lView, tView, directiveIndex, predicate, descend, read, true, tNode.global);
     tView.staticContentQueries = true;
 }
 /**
@@ -71598,7 +71598,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
             // If the element is the host of a component, then all nodes in its view have to be processed.
             // Note: the component's content (tNode.child) will be processed from the insertion points.
             /** @type {?} */
-            const componentView = getComponentViewByIndex(tNode.index, lView);
+            const componentView = getComponentViewByIndex(tNode.global, lView);
             if (componentView && componentView[TVIEW].firstChild) {
                 _queryNodeChildrenR3((/** @type {?} */ (componentView[TVIEW].firstChild)), componentView, predicate, matches, elementsOnly, rootNativeNode);
             }
@@ -71610,7 +71610,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
         // In all cases, if a dynamic container exists for this node, each view inside it has to be
         // processed.
         /** @type {?} */
-        const nodeOrContainer = lView[tNode.index];
+        const nodeOrContainer = lView[tNode.global];
         if (isLContainer(nodeOrContainer)) {
             _queryNodeChildrenInContainerR3(nodeOrContainer, predicate, matches, elementsOnly, rootNativeNode);
         }
@@ -71619,7 +71619,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
         // Case 2: the TNode is a container
         // The native node has to be checked.
         /** @type {?} */
-        const lContainer = lView[tNode.index];
+        const lContainer = lView[tNode.global];
         _addQueryMatchR3(lContainer[NATIVE], predicate, matches, elementsOnly, rootNativeNode);
         // Each view inside the container has to be processed.
         _queryNodeChildrenInContainerR3(lContainer, predicate, matches, elementsOnly, rootNativeNode);
@@ -71642,7 +71642,7 @@ function _queryNodeChildrenR3(tNode, lView, predicate, matches, elementsOnly, ro
             /** @type {?} */
             const nextLView = (/** @type {?} */ ((/** @type {?} */ (componentView[PARENT]))));
             /** @type {?} */
-            const nextTNode = (/** @type {?} */ (nextLView[TVIEW].data[head.index]));
+            const nextTNode = (/** @type {?} */ (nextLView[TVIEW].data[head.global]));
             _queryNodeChildrenR3(nextTNode, nextLView, predicate, matches, elementsOnly, rootNativeNode);
         }
     }
@@ -72702,7 +72702,7 @@ function appendNgContent(view, renderHost, def) {
         return;
     }
     /** @type {?} */
-    const ngContentIndex = (/** @type {?} */ (def.ngContent)).index;
+    const ngContentIndex = (/** @type {?} */ (def.ngContent)).global;
     visitProjectedRenderNodes(view, ngContentIndex, 1 /* AppendChild */, parentEl, null, undefined);
 }
 
@@ -82564,8 +82564,8 @@ function createUrlTree(route, urlTree, commands, queryParams, fragment) {
     const startingPosition = findStartingPosition(nav, urlTree, route);
     /** @type {?} */
     const segmentGroup = startingPosition.processChildren ?
-        updateSegmentGroupChildren(startingPosition.segmentGroup, startingPosition.index, nav.commands) :
-        updateSegmentGroup(startingPosition.segmentGroup, startingPosition.index, nav.commands);
+        updateSegmentGroupChildren(startingPosition.segmentGroup, startingPosition.global, nav.commands) :
+        updateSegmentGroup(startingPosition.segmentGroup, startingPosition.global, nav.commands);
     return tree(startingPosition.segmentGroup, segmentGroup, urlTree, queryParams, fragment);
 }
 /**
@@ -97954,10 +97954,10 @@ class VirtualAction extends _AsyncAction__WEBPACK_IMPORTED_MODULE_0__["AsyncActi
     }
     static sortActions(a, b) {
         if (a.delay === b.delay) {
-            if (a.index === b.index) {
+            if (a.global === b.global) {
                 return 0;
             }
-            else if (a.index > b.index) {
+            else if (a.global > b.global) {
                 return 1;
             }
             else {

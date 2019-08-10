@@ -8,7 +8,9 @@ import {CompraListComponent} from './components/compra-list/compra-list.componen
 import {ListaCompraComponent} from './containers/lista-compra/lista-compra.component';
 import {SharedModule} from '../core/shared/shared.module';
 import {StoreModule} from '@ngrx/store';
-import {itemReducer} from './store/reducers/global.reducer';
+import {itemReducer} from './store/reducers/feature.reducer';
+import {EffectsModule} from '@ngrx/effects';
+import {ItemsEffects} from './store/effects/items.effects';
 
 
 
@@ -21,6 +23,7 @@ import {itemReducer} from './store/reducers/global.reducer';
     ListaRoutingModule,
     SharedModule,
     StoreModule.forFeature('item', itemReducer),
+    EffectsModule.forFeature([ItemsEffects])
 
 
   ]

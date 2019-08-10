@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "lista-churrasco": {
+      "hosting": {
+        "churrasco": [
+          "lista-churrasco"
+        ]
+      }
+    }
+  }
+}

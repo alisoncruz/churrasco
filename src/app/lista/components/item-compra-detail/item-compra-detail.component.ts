@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Item} from '../../model/item';
 import {unselectItem, updateItem} from '../../store/actions/item.actions';
 import {FormBuilder} from '@angular/forms';
+import {Action} from "@ngrx/store";
 
 
 @Component({
@@ -23,11 +24,14 @@ export class ItemCompraDetailComponent implements OnInit {
   });
 
   @Output()
-  actionEmitter = new EventEmitter();
+  actionEmitter = new EventEmitter<Action>();
 
   @Input()
   set item(item: Item) {
-    this.itemForm.patchValue(item);
+    if (item) {
+      this.itemForm.patchValue(item);
+    }
+
   }
 
 
@@ -35,7 +39,7 @@ export class ItemCompraDetailComponent implements OnInit {
   }
 
   unselect() {
-    this.actionEmitter.emit(unselectItem);
+    this.actionEmitter.emit(unselectItem());
   }
 
   update() {

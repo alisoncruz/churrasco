@@ -464,7 +464,7 @@ module.exports = {
         if (DESCRIPTORS) state.size++;
         else that.size++;
         // add to index
-        if (index !== 'F') state.index[index] = entry;
+        if (index !== 'F') state.global[index] = entry;
       } return that;
     };
 
@@ -473,7 +473,7 @@ module.exports = {
       // fast case
       var index = fastKey(key);
       var entry;
-      if (index !== 'F') return state.index[index];
+      if (index !== 'F') return state.global[index];
       // frozen object case
       for (entry = state.first; entry; entry = entry.next) {
         if (entry.key == key) return entry;
@@ -486,12 +486,12 @@ module.exports = {
       clear: function clear() {
         var that = this;
         var state = getInternalState(that);
-        var data = state.index;
+        var data = state.global;
         var entry = state.first;
         while (entry) {
           entry.removed = true;
           if (entry.previous) entry.previous = entry.previous.next = undefined;
-          delete data[entry.index];
+          delete data[entry.global];
           entry = entry.next;
         }
         state.first = state.last = undefined;
@@ -507,7 +507,7 @@ module.exports = {
         if (entry) {
           var next = entry.next;
           var prev = entry.previous;
-          delete state.index[entry.index];
+          delete state.global[entry.global];
           entry.removed = true;
           if (prev) prev.next = next;
           if (next) next.previous = prev;

@@ -1,5 +1,5 @@
 import {createSelector} from '@ngrx/store';
-import {getItemsState} from '../reducers/global.reducer';
+import {getItemsState} from '../reducers/feature.reducer';
 import {itemAdapter} from '../reducers/item.reducer';
 
 export const getItemState = createSelector(

@@ -1173,7 +1173,7 @@ module.exports = {
         if (DESCRIPTORS) state.size++;
         else that.size++;
         // add to index
-        if (index !== 'F') state.index[index] = entry;
+        if (index !== 'F') state.global[index] = entry;
       } return that;
     };
 
@@ -1182,7 +1182,7 @@ module.exports = {
       // fast case
       var index = fastKey(key);
       var entry;
-      if (index !== 'F') return state.index[index];
+      if (index !== 'F') return state.global[index];
       // frozen object case
       for (entry = state.first; entry; entry = entry.next) {
         if (entry.key == key) return entry;
@@ -1195,12 +1195,12 @@ module.exports = {
       clear: function clear() {
         var that = this;
         var state = getInternalState(that);
-        var data = state.index;
+        var data = state.global;
         var entry = state.first;
         while (entry) {
           entry.removed = true;
           if (entry.previous) entry.previous = entry.previous.next = undefined;
-          delete data[entry.index];
+          delete data[entry.global];
           entry = entry.next;
         }
         state.first = state.last = undefined;
@@ -1216,7 +1216,7 @@ module.exports = {
         if (entry) {
           var next = entry.next;
           var prev = entry.previous;
-          delete state.index[entry.index];
+          delete state.global[entry.global];
           entry.removed = true;
           if (prev) prev.next = next;
           if (next) next.previous = prev;
@@ -5002,7 +5002,7 @@ module.exports = defineIterator(Array, 'Array', function (iterated, kind) {
   var state = getInternalState(this);
   var target = state.target;
   var kind = state.kind;
-  var index = state.index++;
+  var index = state.global++;
   if (!target || index >= target.length) {
     state.target = undefined;
     return { value: undefined, done: true };
@@ -8357,7 +8357,7 @@ fixRegExpWellKnownSymbolLogic('replace', 2, function (REPLACE, nativeReplace, ma
         result = results[i];
 
         var matched = String(result[0]);
-        var position = max(min(toInteger(result.index), S.length), 0);
+        var position = max(min(toInteger(result.global), S.length), 0);
         var captures = [];
         // NOTE: This is equivalent to
         //   captures = result.slice(1).map(maybeToString)
@@ -8458,7 +8458,7 @@ fixRegExpWellKnownSymbolLogic('search', 1, function (SEARCH, nativeSearch, maybe
       if (!sameValue(previousLastIndex, 0)) rx.lastIndex = 0;
       var result = regExpExec(rx, S);
       if (!sameValue(rx.lastIndex, previousLastIndex)) rx.lastIndex = previousLastIndex;
-      return result === null ? -1 : result.index;
+      return result === null ? -1 : result.global;
     }
   ];
 });
@@ -8550,13 +8550,13 @@ fixRegExpWellKnownSymbolLogic('split', 2, function (SPLIT, nativeSplit, maybeCal
       while (match = regexpExec.call(separatorCopy, string)) {
         lastIndex = separatorCopy.lastIndex;
         if (lastIndex > lastLastIndex) {
-          output.push(string.slice(lastLastIndex, match.index));
-          if (match.length > 1 && match.index < string.length) arrayPush.apply(output, match.slice(1));
+          output.push(string.slice(lastLastIndex, match.global));
+          if (match.length > 1 && match.global < string.length) arrayPush.apply(output, match.slice(1));
           lastLength = match[0].length;
           lastLastIndex = lastIndex;
           if (output.length >= lim) break;
         }
-        if (separatorCopy.lastIndex === match.index) separatorCopy.lastIndex++; // Avoid an infinite loop
+        if (separatorCopy.lastIndex === match.global) separatorCopy.lastIndex++; // Avoid an infinite loop
       }
       if (lastLastIndex === string.length) {
         if (lastLength || !separatorCopy.test('')) output.push('');

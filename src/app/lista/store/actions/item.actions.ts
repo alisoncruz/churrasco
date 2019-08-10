@@ -1,6 +1,11 @@
 import {createAction, props} from '@ngrx/store';
 import {Item} from '../../model/item';
 
+export const updateItemsList = createAction(
+  '[Items] Update Items List',
+  props < {items: Item[]}>()
+);
+
 export const createItem = createAction(
   '[Items] Create Item.',
   props<{ item: Item }>()
@@ -13,7 +18,7 @@ export const updateItem = createAction(
 
 export const deleteItem = createAction(
   '[Items] Delete Item.',
-  props<{ id: number }>()
+  props<{ id: string }>()
 );
 
 export const selectItem = createAction(
@@ -23,5 +28,6 @@ export const selectItem = createAction(
 
 export const unselectItem = createAction(
   '[Items] Unselect Item.',
-  props<{ item: Item }>()
 );
+
+
