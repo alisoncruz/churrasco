@@ -1,10 +1,10 @@
 <mat-sidenav-container fxFlexFill>
   <mat-sidenav mode="over" #sidenav>
     <mat-list>
-      <mat-list-item routerLink="/core/layout/home">
+      <mat-list-item routerLink="/core/layout/home" (click)="sidenav.close()">
         <mat-icon>home</mat-icon>Home
       </mat-list-item>
-      <mat-list-item routerLink="/core/layout/lista">
+      <mat-list-item routerLink="/core/layout/lista" (click)="sidenav.close()">
         <mat-icon>local_bar</mat-icon>Lista
       </mat-list-item>
     </mat-list>
@@ -12,7 +12,7 @@
 
   <mat-sidenav-content fxFlexFill>
     <mat-toolbar color="primary">
-      <button mat-icon-button (click)="sidenav.toggle()">
+      <button mat-icon-button (click)="sidenav.open()">
         <mat-icon>menu</mat-icon>
       </button>
       Churrasco

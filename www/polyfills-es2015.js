@@ -464,7 +464,7 @@ module.exports = {
         if (DESCRIPTORS) state.size++;
         else that.size++;
         // add to index
-        if (index !== 'F') state.global[index] = entry;
+        if (index !== 'F') state.index[index] = entry;
       } return that;
     };
 
@@ -473,7 +473,7 @@ module.exports = {
       // fast case
       var index = fastKey(key);
       var entry;
-      if (index !== 'F') return state.global[index];
+      if (index !== 'F') return state.index[index];
       // frozen object case
       for (entry = state.first; entry; entry = entry.next) {
         if (entry.key == key) return entry;
@@ -486,12 +486,12 @@ module.exports = {
       clear: function clear() {
         var that = this;
         var state = getInternalState(that);
-        var data = state.global;
+        var data = state.index;
         var entry = state.first;
         while (entry) {
           entry.removed = true;
           if (entry.previous) entry.previous = entry.previous.next = undefined;
-          delete data[entry.global];
+          delete data[entry.index];
           entry = entry.next;
         }
         state.first = state.last = undefined;
@@ -507,7 +507,7 @@ module.exports = {
         if (entry) {
           var next = entry.next;
           var prev = entry.previous;
-          delete state.global[entry.global];
+          delete state.index[entry.index];
           entry.removed = true;
           if (prev) prev.next = next;
           if (next) next.previous = prev;
@@ -6139,8 +6139,8 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\Users\clayton.chagas\WebstormProjects\churrasco\src\polyfills.ts */"./src/polyfills.ts");
-module.exports = __webpack_require__(/*! C:\Users\clayton.chagas\WebstormProjects\churrasco\node_modules\@angular-devkit\build-angular\src\angular-cli-files\models\jit-polyfills.js */"./node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js");
+__webpack_require__(/*! C:\Users\aliso\estudos\trabalhopos\src\polyfills.ts */"./src/polyfills.ts");
+module.exports = __webpack_require__(/*! C:\Users\aliso\estudos\trabalhopos\node_modules\@angular-devkit\build-angular\src\angular-cli-files\models\jit-polyfills.js */"./node_modules/@angular-devkit/build-angular/src/angular-cli-files/models/jit-polyfills.js");
 
 
 /***/ })

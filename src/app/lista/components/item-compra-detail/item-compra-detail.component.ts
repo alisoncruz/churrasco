@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Item} from '../../model/item';
-import {unselectItem, updateItem} from '../../store/actions/item.actions';
+import {createItem, deleteItem, unselectItem, updateItem} from '../../store/actions/item.actions';
 import {FormBuilder} from '@angular/forms';
-import {Action} from "@ngrx/store";
+import {Action} from '@ngrx/store';
 
 
 @Component({
@@ -34,7 +34,6 @@ export class ItemCompraDetailComponent implements OnInit {
 
   }
 
-
   ngOnInit() {
   }
 
@@ -43,6 +42,15 @@ export class ItemCompraDetailComponent implements OnInit {
   }
 
   update() {
-    this.actionEmitter.emit(updateItem({item: this.itemForm.value}));
+    if (this.itemForm.get('id') && this.itemForm.get('id').value !== '') {
+      this.actionEmitter.emit(updateItem({item: this.itemForm.value}));
+    } else {
+      this.actionEmitter.emit(createItem({item: this.itemForm.value}));
+    }
+
+  }
+
+  delete() {
+    this.actionEmitter.emit(deleteItem({id: this.itemForm.get('id').value}));
   }
 }

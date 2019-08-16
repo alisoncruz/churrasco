@@ -5,6 +5,7 @@ import {Action, select, Store} from '@ngrx/store';
 import {ItemState} from '../../store/reducers/item.reducer';
 
 import {getAllItems} from '../../store/selectors/item.selectors';
+import {selectItem} from '../../store/actions/item.actions';
 
 @Component({
   selector: 'app-lista-compra',
@@ -14,6 +15,7 @@ import {getAllItems} from '../../store/selectors/item.selectors';
 export class ListaCompraComponent implements OnInit {
 
   items$: Observable<Item[]>;
+
 
   constructor(private store: Store<ItemState>) {
   }

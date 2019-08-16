@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {AngularFirestore} from '@angular/fire/firestore';
 import {Actions, createEffect, ofType} from '@ngrx/effects';
-import {updateItem, updateItemsList} from '../actions/item.actions';
+import {createItem, deleteItem, updateItem, updateItemsList} from '../actions/item.actions';
 import {Item} from '../../model/item';
 import {catchError, concatMap, exhaustMap, map, switchMap} from 'rxjs/operators';
 import {from, of} from 'rxjs';
@@ -16,12 +16,6 @@ export class ItemsEffects {
     map(items => updateItemsList({items}))
   ));
 
-  // updateItem = createEffect(() => this.actions$.pipe(
-  //   ofType(updateItem),
-  //   exhaustMap(action => from(this.fireStore.doc(`cards/${action.item.id}`).set(action.item)).pipe(
-  //     concatMap(() => from([]))
-  //     )
-  //   ), {dispatch: false});
 
   updateItem$ = createEffect(() => this.actions$.pipe(
     ofType(updateItem),
@@ -29,10 +23,49 @@ export class ItemsEffects {
       from(this.fireStore.doc(`items/${action.item.id}`).set(action.item)).pipe(
         concatMap(() => from([
           navigateTo({commands: ['core', 'layout', 'lista']}),
-          showSnackBar({message: `${action.item.nome} updated`, config: {}})
+          showSnackBar({message: `Item ${action.item.nome} atualizado`, config: {}})
         ])),
         catchError(() => of(showSnackBar({
           message: 'Ops, something goes wrong', config: {
+            duration: 5000
+          }
+        })))
+      )
+    ),
+  ));
+
+  createItem$ = createEffect(() => this.actions$.pipe(
+    ofType(createItem),
+    exhaustMap((action) =>
+      from(this.fireStore.doc(`items/${this.createId()}`).set({
+          id: this.id,
+          nome: action.item.nome,
+          preco: action.item.preco
+        }
+      )).pipe(
+        concatMap(() => from([
+          navigateTo({commands: ['core', 'layout', 'lista']}),
+          showSnackBar({message: `Item ${action.item.nome} criado`, config: {}})
+        ])),
+        catchError(() => of(showSnackBar({
+          message: 'Ops, something goes wrong.', config: {
+            duration: 5000
+          }
+        })))
+      )
+    ),
+  ));
+
+  deleteItem$ = createEffect(() => this.actions$.pipe(
+    ofType(deleteItem),
+    exhaustMap((action) =>
+      from(this.fireStore.doc(`items/${action.id}`).delete()).pipe(
+        concatMap(() => from([
+          navigateTo({commands: ['core', 'layout', 'lista']}),
+          showSnackBar({message: `Item excluído`, config: {}})
+        ])),
+        catchError(() => of(showSnackBar({
+          message: 'Ops, something goes wrong.', config: {
             duration: 5000
           }
         })))
@@ -44,4 +77,10 @@ export class ItemsEffects {
   constructor(private fireStore: AngularFirestore, private actions$: Actions) {
   }
 
+  id: string;
+
+  private createId() {
+    this.id = this.fireStore.createId();
+    return this.id;
+  }
 }
