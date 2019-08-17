@@ -26,13 +26,13 @@ const reducer = createReducer(
   initialState,
   on(updateItemsList, (state, {items}) => itemAdapter.addAll(items, state)),
   on(selectItem, (state, {item}) => ({...state, item})),
-  on(unselectItem, updateItem, (state: ItemState) => {
+  on(unselectItem, updateItem, createItem, deleteItem, (state: ItemState) => {
     const {item, ...rest} = state;
     return rest;
   }),
-  on(createItem, (state, {item}) => itemAdapter.addOne(item, state)),
+  // on(createItem, (state, {item}) => itemAdapter.addOne(item, state)),
   // on(updateItem, (state, {item}) => itemAdapter.updateOne({id: item.id, changes: item}, state)),
-  on(deleteItem, (state, {id}) => itemAdapter.removeOne(id, state))
+  // on(deleteItem, (state, {id}) => itemAdapter.removeOne(id, state))
 );
 
 export function reducerItems(state: ItemState, action: Action) {

@@ -2,11 +2,26 @@
   <mat-sidenav mode="over" #sidenav>
     <mat-list>
       <mat-list-item routerLink="/core/layout/home" (click)="sidenav.close()">
-        <mat-icon>home</mat-icon>Home
+        <mat-icon>home</mat-icon>
+        Home
       </mat-list-item>
       <mat-list-item routerLink="/core/layout/lista" (click)="sidenav.close()">
-        <mat-icon>local_bar</mat-icon>Lista
+        <mat-icon>local_bar</mat-icon>
+        Lista
       </mat-list-item>
+
+      <mat-list-item (click)="logout(); sidenav.close()" *ngIf="isUserAutenticated$ | async else login"   >
+        <mat-icon>exit_to_app</mat-icon>
+        Logout
+      </mat-list-item>
+
+      <ng-template #login>
+        <mat-list-item routerLink="/core/layout/login" (click)="sidenav.close()" >
+          <mat-icon>account_box</mat-icon>
+          Login
+        </mat-list-item>
+      </ng-template>
+
     </mat-list>
   </mat-sidenav>
 

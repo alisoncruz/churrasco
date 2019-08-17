@@ -1,0 +1,29 @@
+[debug] [2019-08-17T17:44:50.126Z] ----------------------------------------------------------------------
+[debug] [2019-08-17T17:44:50.128Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\clayton.chagas\WebstormProjects\churrasco\node_modules\firebase-tools\lib\bin\firebase.js serve
+[debug] [2019-08-17T17:44:50.128Z] CLI Version:   6.12.0
+[debug] [2019-08-17T17:44:50.128Z] Platform:      win32
+[debug] [2019-08-17T17:44:50.128Z] Node Version:  v10.15.3
+[debug] [2019-08-17T17:44:50.131Z] Time:          Sat Aug 17 2019 14:44:50 GMT-0300 (GMT-03:00)
+[debug] [2019-08-17T17:44:50.131Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2019-08-17T17:44:50.144Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2019-08-17T17:44:50.144Z] > authorizing via signed-in user
+[debug] [2019-08-17T17:44:50.144Z] [iam] checking project lista-churrasco for permissions ["firebase.projects.get"]
+[debug] [2019-08-17T17:44:50.146Z] > refreshing access token with scopes: ["email","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","openid"]
+[debug] [2019-08-17T17:44:50.146Z] >>> HTTP REQUEST POST https://www.googleapis.com/oauth2/v3/token  
+ <request body omitted>
+[debug] [2019-08-17T17:44:50.356Z] <<< HTTP RESPONSE 200
+[debug] [2019-08-17T17:44:50.396Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/lista-churrasco:testIamPermissions  
+
+[debug] [2019-08-17T17:44:51.344Z] <<< HTTP RESPONSE 200
+[debug] [2019-08-17T17:44:51.346Z] >>> HTTP REQUEST GET https://cloudresourcemanager.googleapis.com/v1/projects/lista-churrasco  
+ 
+[debug] [2019-08-17T17:44:52.242Z] <<< HTTP RESPONSE 200
+[info] 
+[info] === Serving from 'C:\Users\clayton.chagas\WebstormProjects\churrasco'...
+[info] 
+[debug] [2019-08-17T17:44:52.249Z] >>> HTTP REQUEST GET https://mobilesdk-pa.googleapis.com/v1/projects/380448456143/clients/_:getWebAppConfig  
+ 
+[debug] [2019-08-17T17:44:52.679Z] <<< HTTP RESPONSE 200
+[info] i  hosting: Serving hosting files from: www
+[info] +  hosting: Local server: http://localhost:5000
